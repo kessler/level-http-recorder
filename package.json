@@ -1,0 +1,29 @@
+{
+  "name": "level-http-recorder",
+  "version": "0.0.1",
+  "description": "a middlware that writes all requests to a leveldb",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kessler/level-http-recorder"
+  },
+  "keywords": [
+    "leveldb",
+    "middleware"
+  ],
+  "author": "Yaniv Kessler",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/kessler/level-http-recorder/issues"
+  },
+  "devDependencies": {
+    "mocha": "~1.17.1",
+    "level-ttl": "~0.5.0",
+    "levelup": "~0.18.2",
+    "leveldown": "~0.10.2",
+    "level-sublevel": "~5.2.0"
+  }
+}
