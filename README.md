@@ -27,9 +27,4 @@ http.createServer(stack(levelHttpRecorder))
 
 ```
 
-## using [level-http-recorder](https://github.com/kessler/darkmagic) :
-```
-require('darkmagic').inject(levelHttpRecorder, stack, http) {
-	http.createServer(stack(levelHttpRecorder))
-}
-```
+> can be used with [DarkMagic](https://github.com/kessler/darkmagic)
