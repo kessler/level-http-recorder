@@ -1,4 +1,4 @@
-var dbHandler = require('../lib/handler.js')
+var dbHandler = require('../index.js')
 var db = require('levelup')('./testdb')
 db = require('level-ttl')(db)
 
