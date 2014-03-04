@@ -1,7 +1,7 @@
 {
   "name": "level-http-recorder",
   "version": "0.0.1",
-  "description": "a middlware that writes all requests to a leveldb",
+  "description": "A rudimentary middleware / handler that records http requests to a local level db",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
