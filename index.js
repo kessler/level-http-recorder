@@ -5,12 +5,20 @@ var noopLog = {
 	}
 }
 
-module.exports = function injectableHandlerFactory(db, config, log) {
+function modifyNoop() {}
+
+module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 	if (!db)
 		throw new Error('must supply a db instance')
 
 	config = config  || {}
 	log = log || noopLog
+	modify_ = modify_ || modifyNoop
+
+	if (config.writeBody === undefined) {
+		// TODO: should probably clone this before...
+		config.writeBody = true
+	}
 
 	var counter = 0
 	var suffix = 6
@@ -37,6 +45,8 @@ module.exports = function injectableHandlerFactory(db, config, log) {
 		if (request.trailers)
 			result.trailers = request.trailers
 
+		modify_(result, request)
+
 		return result
 	}
 
@@ -62,14 +72,14 @@ module.exports = function injectableHandlerFactory(db, config, log) {
 
 			response.statusCode = 200
 
-			if (request.body) {
+			if (config.writeBody && request.body) {
 				db.put(id + '-body', request.body, { ttl: config.dbTTL }, putDataCallback)
 			} else {
 				next()
 			}
 		}
 
-		// 2
+		//2
 		function putDataCallback(err) {
 			if (err) {
 				log.error(err.message)
