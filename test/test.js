@@ -24,7 +24,7 @@ describe('dbHandler writes requests to levelup', function () {
 	beforeEach(function () {
 		handler = dbHandler(db, handlerConfig, log)
 
-		response = {}
+		response = { statusCode: 200 }
 
 		request = {
 			ip: '1.2.3.4',
@@ -68,7 +68,7 @@ describe('dbHandler writes requests to levelup', function () {
 		}
 	})
 
-	it('invokes the modification function', function (done) {
+	it('and invokes the modification function', function (done) {
 		this.timeout(10000)
 
 		handler = dbHandler(db, handlerConfig, log, function (data, _request) {
@@ -79,7 +79,9 @@ describe('dbHandler writes requests to levelup', function () {
 
 		console.time('request')
 
-		handler(request, response)
+		handler(request, response, function () {
+
+		})
 	})
 
 	it('writes post data', function (done) {
@@ -121,7 +123,7 @@ describe('dbHandler writes requests to levelup', function () {
 		}
 	})
 
-	it('does not write post data', function (done) {
+	it('but does not write post data', function (done) {
 		this.timeout(10000)
 
 		handler = dbHandler(db, { writeBody: false, dbTTL: 1000 * 10 }, log)
