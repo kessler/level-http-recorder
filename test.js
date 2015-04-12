@@ -1,4 +1,4 @@
-var dbHandler = require('./index.js')
+var middleware = require('./index.js')
 var db = require('levelup')('./testdb')
 
 var assert = require('assert')
@@ -13,14 +13,14 @@ var log = {
 	}
 }
 
-describe('dbHandler writes requests to levelup', function () {
+describe('level-http-recorder writes requests to leveldb', function () {
 
 	var handler
 	var request
 	var response
 
 	beforeEach(function () {
-		handler = dbHandler(db, handlerConfig, log)
+		handler = middleware(db, handlerConfig, log)
 
 		response = { statusCode: 200 }
 
@@ -69,7 +69,7 @@ describe('dbHandler writes requests to levelup', function () {
 	it('and invokes the modification function', function (done) {
 		this.timeout(10000)
 
-		handler = dbHandler(db, handlerConfig, log, function (data, _request) {
+		handler = middleware(db, handlerConfig, log, function (data, _request) {
 			assert.strictEqual(_request, request)
 			assert.deepEqual(data, {"httpVersion":"1.0","headers":{"a":1},"url":"abc://d.g.f","ip":"1.2.3.4", "method": "get"})
 			done()
@@ -121,10 +121,10 @@ describe('dbHandler writes requests to levelup', function () {
 		}
 	})
 
-	it('but does not write post data when told using option writeBody false', function (done) {
+	it('but does not write post data when using option writeBody = false', function (done) {
 		this.timeout(10000)
 
-		handler = dbHandler(db, { writeBody: false, dbTTL: 1000 * 10 }, log)
+		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 }, log)
 
 		request.body = 'abcd123'
 
