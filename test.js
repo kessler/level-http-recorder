@@ -1,7 +1,5 @@
-var dbHandler = require('../index.js')
+var dbHandler = require('./index.js')
 var db = require('levelup')('./testdb')
-
-db = require('level-ttl')(db)
 
 var assert = require('assert')
 
@@ -123,7 +121,7 @@ describe('dbHandler writes requests to levelup', function () {
 		}
 	})
 
-	it('but does not write post data', function (done) {
+	it('but does not write post data when told using option writeBody false', function (done) {
 		this.timeout(10000)
 
 		handler = dbHandler(db, { writeBody: false, dbTTL: 1000 * 10 }, log)

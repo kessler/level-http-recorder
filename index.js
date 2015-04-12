@@ -50,7 +50,7 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 		return result
 	}
 
-	return function dbHandler(request, response, next) {
+	return function levelHttpRecorderMiddleware(request, response, next) {
 
 		var now = Date.now()
 
@@ -58,37 +58,23 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 
 		var requestData = extract(request)
 
-		//TODO might want client ttl
+		//TODO might want client provided ttl
+		if (config.writeBody && request.body) {
+			var batch = db.batch()
 
-		db.put(id, requestData, { valueEncoding: 'json', ttl: config.dbTTL }, putCallback)
+			batch.put(id, requestData, { valueEncoding: 'json', ttl: config.dbTTL })
+			batch.put(id + '-body', request.body, { ttl: config.dbTTL })
+			batch.write(function (err) {
+				if (err) {
+					return next(err)
+				}
 
-		// 1
-		function putCallback(err) {
-			if (err) {
-				log.error(err.message)
-				response.statusCode = 500
-				return next('failed #11')
-			}
-
-			response.statusCode = 200
-
-			if (config.writeBody && request.body) {
-				db.put(id + '-body', request.body, { ttl: config.dbTTL }, putDataCallback)
-			} else {
 				next()
-			}
-		}
-
-		//2
-		function putDataCallback(err) {
-			if (err) {
-				log.error(err.message)
-				response.statusCode = 500
-				next('failed #12')
-			} else {
-				response.statusCode = 200
-				next()
-			}
-		}
+			})
+		} else {
+			db.put(id, requestData, { valueEncoding: 'json', ttl: config.dbTTL }, function (err) {
+				next(err)
+			})
+		}		
 	}
 }
