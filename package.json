@@ -1,6 +1,6 @@
 {
   "name": "level-http-recorder",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "A rudimentary middleware / handler that records http requests to a local level db",
   "main": "index.js",
   "scripts": {
