@@ -162,4 +162,47 @@ describe('level-http-recorder writes requests to leveldb', function () {
 		}
 	})
 
+	it('using option writeBody = false in the config can still be overidden in the request by using request.writeBody=true', function (done) {
+		this.timeout(10000)
+
+		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 }, log)
+
+		request.writeBody = true
+		request.body = 'abcd123'
+
+		var theId
+
+		function next(err) {
+			console.timeEnd('request')
+
+			if (err) {
+				return done(err)
+			}
+
+			theId = request.id
+			assert.strictEqual(response.statusCode, 200)
+			db.get(request.id, verify1, { valueEncoding: 'json'} )
+		}
+
+		console.time('request')
+
+		handler(request, response, next)
+
+		function verify1(err, data) {
+			if (err)
+				done(err)
+
+			db.get(theId + '-body', verify2)
+		}
+
+		function verify2(err, data) {
+			if (err) {
+				return done(err)
+			}
+
+			assert.strictEqual(data, 'abcd123')
+			done()
+		}
+	})
+
 })

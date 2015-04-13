@@ -45,8 +45,6 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 		if (request.trailers)
 			result.trailers = request.trailers
 
-		modify_(result, request)
-
 		return result
 	}
 
@@ -58,8 +56,10 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 
 		var requestData = extract(request)
 
+		modify_(requestData, request)
+
 		//TODO might want client provided ttl
-		if (config.writeBody && request.body) {
+		if ( (config.writeBody || request.writeBody) && request.body) {
 			var batch = db.batch()
 			batch.put(id, requestData, { valueEncoding: 'json', ttl: config.dbTTL })
 			batch.put(id + '-body', request.body, { ttl: config.dbTTL })
