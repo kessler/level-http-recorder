@@ -60,10 +60,10 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 
 		//TODO might want client provided ttl
 		if ( (config.writeBody || request.writeBody) && request.body) {
-			var batch = db.batch()
-			batch.put(id, requestData, { valueEncoding: 'json', ttl: config.dbTTL })
-			batch.put(id + '-body', request.body, { ttl: config.dbTTL })
-			batch.write(function (err) {
+			var batch = []
+			batch.push({ type: 'put', key: id, value: requestData, valueEncoding: 'json', ttl: config.dbTTL })
+			batch.push({ type: 'put', key: id + '-body', value: request.body, ttl: config.dbTTL })
+			db.batch(batch, function (err) {
 				if (err) {
 					return next(err)
 				}
