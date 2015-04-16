@@ -1,6 +1,8 @@
 # level-http-recorder [![Build Status](https://secure.travis-ci.org/kessler/level-http-recorder.png?branch=master)](http://travis-ci.org/kessler/level-http-recorder) [![stable](http://badges.github.io/stability-badges/dist/stable.svg)](http://github.com/badges/stability-badges)
 
-A rudimentary middleware / handler that records http requests to a local level db in a certain manner, this module doesn't really depend on anything except the levelup interface.
+A rudimentary middleware / handler that records http requests to a local level db.
+
+This module doesn't really depend on anything except the levelup interface.
 
 ## normal use:
 ```
