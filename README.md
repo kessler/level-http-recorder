@@ -3,7 +3,7 @@
 A rudimentary middleware / handler that records http requests to a local level db in a certain manner, this module doesn't really depend on anything except the levelup interface.
 
 ## normal use:
-```
+```js
 var stack = require('stack')
 var db = require('levelup')('./mydb')
 var http = require('http')
