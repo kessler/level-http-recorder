@@ -1,19 +1,12 @@
-var noopLog = {
-	error: function() {
-	},
-	info: function() {
-	}
-}
+var bytewise = require('bytewise')
 
-function modifyNoop() {}
-
-module.exports = function injectableHandlerFactory(db, config, log, modify_) {
-	if (!db)
+module.exports = function injectableHandlerFactory(db, config, modify_) {
+	if (!db) {
 		throw new Error('must supply a db instance')
+	}
 
 	config = config  || {}
-	log = log || noopLog
-	modify_ = modify_ || modifyNoop
+	var modify = modify_ || modifyNoop
 
 	if (config.writeBody === undefined) {
 		// TODO: should probably clone this before...
@@ -21,12 +14,6 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 	}
 
 	var counter = 0
-	var suffix = 6
-
-	setInterval(function () {
-		counter = 0
-		suffix = 42 / suffix
-	}, 1000).unref()
 
 	function extract(request) {
 		var result = {
@@ -59,12 +46,14 @@ module.exports = function injectableHandlerFactory(db, config, log, modify_) {
 
 		var now = Date.now()
 
-		var id = request.id = now + '-' + counter++ + '-' + suffix
+		var id = request._levelHttpRecorderId = bytewise.encode([now, counter++])
 
 		var requestData = extract(request)
+		
+		modify(requestData, request)
 
-		modify_(requestData, request)
-
-		db.put(id, requestData, { valueEncoding: 'json', ttl: config.dbTTL }, next)		
+		db.put(id, requestData, { keyEncoding: bytewise, valueEncoding: 'json', ttl: config.dbTTL }, next)		
 	}
 }
+
+function modifyNoop() {}

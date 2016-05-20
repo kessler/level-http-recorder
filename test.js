@@ -1,6 +1,9 @@
 var middleware = require('./index.js')
-var db = require('levelup')('./testdb', {
-	valueEncoding: 'json'
+var bytewise = require('bytewise')
+
+var db = require('level-hyper')('./testdb', {
+	valueEncoding: 'json',
+	keyEncoding: bytewise
 })
 
 var assert = require('assert')
@@ -9,19 +12,13 @@ var handlerConfig = {
 	dbTTL: 1000 * 10
 }
 
-var log = {
-	error: function(err) {
-		console.log(err)
-	}
-}
-
-describe('level-http-recorder write a request to leveldb', function () {
+describe('level-http-recorder', function () {
 
 	var handler
 	var request
 	var response
 
-	it('simple', function (done) {
+	it('pesists all incoming traffic data to leveldb', function (done) {
 		this.timeout(10000)
 
 		function next(err) {
@@ -29,16 +26,16 @@ describe('level-http-recorder write a request to leveldb', function () {
 				return done(err)
 			}
 
-			assert.strictEqual(response.statusCode, 200)
-			db.get(request.id, verify)
+			assert.strictEqual(response.statusCode, 200, 'expected 200 response code in response')
+			db.get(request._levelHttpRecorderId, verify)
 		}
 		
 		handler(request, response, next)
 
 		function verify(err, data) {
 			// does not gets saved
-			delete request.id
-			assert.deepEqual(data, request)
+			delete request._levelHttpRecorderId
+			assert.deepEqual(data, request, 'request not equal to data')
 			done()
 		}
 	})
@@ -46,15 +43,13 @@ describe('level-http-recorder write a request to leveldb', function () {
 	it('and invokes the modification function', function (done) {
 		this.timeout(10000)
 
-		handler = middleware(db, handlerConfig, log, function (data, _request) {
+		handler = middleware(db, handlerConfig, function (data, _request) {
 			assert.strictEqual(_request, request)
 			assert.deepEqual(data, {"httpVersion":"1.0","headers":{"a":1},"url":"abc://d.g.f","ip":"1.2.3.4", "method": "get"})
 			done()
 		})
 		
-		handler(request, response, function () {
-
-		})
+		handler(request, response, function () {	})
 	})
 
 	it('and writes post data', function (done) {
@@ -69,16 +64,16 @@ describe('level-http-recorder write a request to leveldb', function () {
 				return done(err)
 			}
 
-			theId = request.id
+			theId = request._levelHttpRecorderId
 			assert.strictEqual(response.statusCode, 200)
-			db.get(request.id, verify1)
+			db.get(request._levelHttpRecorderId, verify1)
 		}
 		
 		handler(request, response, next)
 
 		function verify1(err, data) {
 			if (err) {
-				done(err.message)
+				done(err)
 			}
 
 			assert.deepEqual(data.body, request.body)
@@ -89,7 +84,7 @@ describe('level-http-recorder write a request to leveldb', function () {
 	it('and does not write post data when using option writeBody = false', function (done) {
 		this.timeout(10000)
 
-		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 }, log)
+		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 })
 
 		request.body = 'abcd123'
 
@@ -100,9 +95,9 @@ describe('level-http-recorder write a request to leveldb', function () {
 				return done(err)
 			}
 
-			theId = request.id
+			theId = request._levelHttpRecorderId
 			assert.strictEqual(response.statusCode, 200)
-			db.get(request.id, verify1)
+			db.get(request._levelHttpRecorderId, verify1)
 		}
 		
 		handler(request, response, next)
@@ -119,7 +114,7 @@ describe('level-http-recorder write a request to leveldb', function () {
 	it('using option writeBody = false in the config can still be overidden in the request by using request.writeBody=true', function (done) {
 		this.timeout(10000)
 
-		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 }, log)
+		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 })
 
 		request.writeBody = true
 		request.body = 'abcd123'
@@ -131,9 +126,9 @@ describe('level-http-recorder write a request to leveldb', function () {
 				return done(err)
 			}
 
-			theId = request.id
+			theId = request._levelHttpRecorderId
 			assert.strictEqual(response.statusCode, 200)
-			db.get(request.id, verify1)
+			db.get(request._levelHttpRecorderId, verify1)
 		}
 		
 		handler(request, response, next)
@@ -148,7 +143,7 @@ describe('level-http-recorder write a request to leveldb', function () {
 	})
 
 	beforeEach(function () {
-		handler = middleware(db, handlerConfig, log)
+		handler = middleware(db, handlerConfig)
 
 		response = { statusCode: 200 }
 
