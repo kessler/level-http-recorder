@@ -1,8 +1,13 @@
-var bytewise = require('bytewise')
+const bytewise = require('bytewise')
 
 module.exports = function injectableHandlerFactory(db, config, modify_) {
 	if (!db) {
 		throw new Error('must supply a db instance')
+	}
+
+	if (typeof config === 'function') {
+		modify_ = config
+		config = undefined
 	}
 
 	config = config  || {}
@@ -46,7 +51,8 @@ module.exports = function injectableHandlerFactory(db, config, modify_) {
 
 		var now = Date.now()
 
-		var id = request._levelHttpRecorderId = bytewise.encode([now, counter++])
+		var id = [now, counter++]
+		request._levelHttpRecorderId = bytewise.encode(id)
 
 		var requestData = extract(request)
 		

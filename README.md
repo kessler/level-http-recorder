@@ -2,31 +2,36 @@
 
 A rudimentary middleware / handler that records http requests to a local level db.
 
-This module doesn't really depend on anything except the levelup interface.
+This module expects the given db to support:
+- levelup interface 
+- bytewise key encoding
+- json value encoding
 
 ## normal use:
 ```js
 var stack = require('stack')
-var db = require('levelup')('./mydb')
+var db = require('level-bytewise')('./mydb')
 var http = require('http')
 
-// optionally have items expire, you will need to install level-ttl for this to take effect
-var config = {
-	dbTTL: 1000 * 10
-}
-
-// optionally, plug in whatever logger you are using
-var log = {
-	error: function() {
-	},
-	info: function() {
-	}
-}
-
-var levelHttpRecorder = require('level-http-recorder')(db, config, log)
+var levelHttpRecorder = require('level-http-recorder')(db)
 
 http.createServer(stack(levelHttpRecorder))
 
 ```
 
-> can be used with [DarkMagic](https://github.com/kessler/darkmagic)
+### modify before a request is persisted
+```javascript
+var stack = require('stack')
+var db = require('level-bytewise')('./mydb')
+var http = require('http')
+
+var levelHttpRecorder = require('level-http-recorder')(db, function (requestData, request) {
+    // do stuff to request data
+    // DO NOT modify request!
+})
+
+http.createServer(stack(levelHttpRecorder))
+```
+
+
+can be used with [DarkMagic](https://github.com/kessler/darkmagic)

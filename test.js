@@ -1,24 +1,18 @@
 var middleware = require('./index.js')
-var bytewise = require('bytewise')
 
-var db = require('level-hyper')('./testdb', {
-	valueEncoding: 'json',
-	keyEncoding: bytewise
-})
+var db = require('level-bytewise')('./testdb')
 
 var assert = require('assert')
 
-var handlerConfig = {
-	dbTTL: 1000 * 10
-}
+var handlerConfig = {}
 
-describe('level-http-recorder', function () {
+describe('level-http-recorder', function() {
 
 	var handler
 	var request
 	var response
 
-	it('pesists all incoming traffic data to leveldb', function (done) {
+	it('pesists all incoming traffic data to leveldb', function(done) {
 		this.timeout(10000)
 
 		function next(err) {
@@ -29,7 +23,7 @@ describe('level-http-recorder', function () {
 			assert.strictEqual(response.statusCode, 200, 'expected 200 response code in response')
 			db.get(request._levelHttpRecorderId, verify)
 		}
-		
+
 		handler(request, response, next)
 
 		function verify(err, data) {
@@ -40,19 +34,19 @@ describe('level-http-recorder', function () {
 		}
 	})
 
-	it('and invokes the modification function', function (done) {
+	it('and invokes the modification function', function(done) {
 		this.timeout(10000)
 
-		handler = middleware(db, handlerConfig, function (data, _request) {
+		handler = middleware(db, handlerConfig, function(data, _request) {
 			assert.strictEqual(_request, request)
-			assert.deepEqual(data, {"httpVersion":"1.0","headers":{"a":1},"url":"abc://d.g.f","ip":"1.2.3.4", "method": "get"})
+			assert.deepEqual(data, { "httpVersion": "1.0", "headers": { "a": 1 }, "url": "abc://d.g.f", "ip": "1.2.3.4", "method": "get" })
 			done()
 		})
-		
-		handler(request, response, function () {	})
+
+		handler(request, response, function() {})
 	})
 
-	it('and writes post data', function (done) {
+	it('and writes post data', function(done) {
 		this.timeout(10000)
 
 		request.body = 'abcd123'
@@ -68,7 +62,7 @@ describe('level-http-recorder', function () {
 			assert.strictEqual(response.statusCode, 200)
 			db.get(request._levelHttpRecorderId, verify1)
 		}
-		
+
 		handler(request, response, next)
 
 		function verify1(err, data) {
@@ -81,7 +75,7 @@ describe('level-http-recorder', function () {
 		}
 	})
 
-	it('and does not write post data when using option writeBody = false', function (done) {
+	it('and does not write post data when using option writeBody = false', function(done) {
 		this.timeout(10000)
 
 		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 })
@@ -99,7 +93,7 @@ describe('level-http-recorder', function () {
 			assert.strictEqual(response.statusCode, 200)
 			db.get(request._levelHttpRecorderId, verify1)
 		}
-		
+
 		handler(request, response, next)
 
 		function verify1(err, data) {
@@ -111,7 +105,7 @@ describe('level-http-recorder', function () {
 		}
 	})
 
-	it('using option writeBody = false in the config can still be overidden in the request by using request.writeBody=true', function (done) {
+	it('using option writeBody = false in the config can still be overidden in the request by using request.writeBody=true', function(done) {
 		this.timeout(10000)
 
 		handler = middleware(db, { writeBody: false, dbTTL: 1000 * 10 })
@@ -130,19 +124,19 @@ describe('level-http-recorder', function () {
 			assert.strictEqual(response.statusCode, 200)
 			db.get(request._levelHttpRecorderId, verify1)
 		}
-		
+
 		handler(request, response, next)
 
 		function verify1(err, data) {
 			if (err)
 				done(err)
-			
+
 			assert.strictEqual(data.body, request.body)
 			done()
 		}
 	})
 
-	beforeEach(function () {
+	beforeEach(function() {
 		handler = middleware(db, handlerConfig)
 
 		response = { statusCode: 200 }
@@ -158,7 +152,7 @@ describe('level-http-recorder', function () {
 		}
 	})
 
-	after(function () {
+	after(function() {
 		db.close()
 	})
 })
