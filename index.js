@@ -58,7 +58,7 @@ module.exports = function injectableHandlerFactory(db, config, modify_) {
 		
 		modify(requestData, request)
 
-		db.put(id, requestData, { keyEncoding: bytewise, valueEncoding: 'json', ttl: config.dbTTL }, next)		
+		db.put(id, requestData, next)		
 	}
 }
 
