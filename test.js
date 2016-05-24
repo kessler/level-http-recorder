@@ -27,6 +27,7 @@ describe('level-http-recorder', function() {
 		handler(request, response, next)
 
 		function verify(err, data) {
+			if (err) return done (err)
 			// does not gets saved
 			delete request._levelHttpRecorderId
 			assert.deepEqual(data, request, 'request not equal to data')
