@@ -1,4 +1,4 @@
-module.exports = function injectableHandlerFactory(db, config, modify_) {
+module.exports = function createMiddleware(db, config, modify_) {
 	if (!db) {
 		throw new Error('must supply a db instance')
 	}
@@ -17,13 +17,20 @@ module.exports = function injectableHandlerFactory(db, config, modify_) {
 	}
 
 	var counter = 0
+	var label = Date.now() 
+
+	setInterval(function () {
+		label = Date.now()
+		counter = 0
+	}).unref()
 
 	function extract(request) {
 		var result = {
 			method: request.method,
 			httpVersion: request.httpVersion,
 			headers: request.headers,
-			url: request.url
+			url: request.url,
+			timestamp: Date.now()
 		}
 
 		if (request.ip) {
@@ -47,9 +54,7 @@ module.exports = function injectableHandlerFactory(db, config, modify_) {
 
 	return function levelHttpRecorderMiddleware(request, response, next) {
 
-		var now = Date.now()
-
-		var id = [now, counter++]
+		var id = [label, counter++]
 		request._levelHttpRecorderId = id
 
 		var requestData = extract(request)

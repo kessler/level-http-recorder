@@ -33,5 +33,15 @@ var levelHttpRecorder = require('level-http-recorder')(db, function (requestData
 http.createServer(stack(levelHttpRecorder))
 ```
 
-
-can be used with [DarkMagic](https://github.com/kessler/darkmagic)
+### schema
+Every recorded request will have the following fields
+```javascript
+    var result = {
+        method: request.method,
+        httpVersion: request.httpVersion,
+        headers: request.headers,
+        url: request.url,
+        time: Date.utc(),
+        body: ... // if there is a body to the request and config.writeBody === true
+    }
+```

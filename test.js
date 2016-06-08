@@ -2,7 +2,7 @@ var middleware = require('./index.js')
 
 var db = require('level-bytewise')('./testdb')
 
-var assert = require('assert')
+var expect = require('chai').expect
 
 var handlerConfig = {}
 
@@ -20,17 +20,21 @@ describe('level-http-recorder', function() {
 				return done(err)
 			}
 
-			assert.strictEqual(response.statusCode, 200, 'expected 200 response code in response')
+			expect(response).to.have.property('statusCode', 200)
 			db.get(request._levelHttpRecorderId, verify)
 		}
 
 		handler(request, response, next)
 
 		function verify(err, data) {
-			if (err) return done (err)
-			// does not gets saved
+			if (err) return done(err)
+				// does not gets saved
 			delete request._levelHttpRecorderId
-			assert.deepEqual(data, request, 'request not equal to data')
+			expect(data).to.have.property('httpVersion', '1.0')
+			expect(data).to.have.property('url', 'abc://d.g.f')
+			expect(data).to.have.property('ip', '1.2.3.4')
+			expect(data).to.have.property('method', 'get')
+			expect(data).to.have.property('timestamp')
 			done()
 		}
 	})
@@ -39,8 +43,14 @@ describe('level-http-recorder', function() {
 		this.timeout(10000)
 
 		handler = middleware(db, handlerConfig, function(data, _request) {
-			assert.strictEqual(_request, request)
-			assert.deepEqual(data, { "httpVersion": "1.0", "headers": { "a": 1 }, "url": "abc://d.g.f", "ip": "1.2.3.4", "method": "get" })
+			expect(_request).to.eql(request)
+			expect(data).to.have.property('httpVersion', '1.0')
+			expect(data).to.have.property('headers')
+			expect(data.headers).to.eql({ a: 1 })
+			expect(data).to.have.property('url', 'abc://d.g.f')
+			expect(data).to.have.property('ip', '1.2.3.4')
+			expect(data).to.have.property('method', 'get')
+			expect(data).to.have.property('timestamp')
 			done()
 		})
 
@@ -60,7 +70,7 @@ describe('level-http-recorder', function() {
 			}
 
 			theId = request._levelHttpRecorderId
-			assert.strictEqual(response.statusCode, 200)
+			expect(response).to.have.property('statusCode', 200)
 			db.get(request._levelHttpRecorderId, verify1)
 		}
 
@@ -71,7 +81,8 @@ describe('level-http-recorder', function() {
 				done(err)
 			}
 
-			assert.deepEqual(data.body, request.body)
+			expect(data).to.have.property('body')
+			expect(data.body).to.eql(request.body)
 			done()
 		}
 	})
@@ -91,7 +102,7 @@ describe('level-http-recorder', function() {
 			}
 
 			theId = request._levelHttpRecorderId
-			assert.strictEqual(response.statusCode, 200)
+			expect(response).to.have.property('statusCode', 200)
 			db.get(request._levelHttpRecorderId, verify1)
 		}
 
@@ -101,7 +112,7 @@ describe('level-http-recorder', function() {
 			if (err)
 				done(err)
 
-			assert(!data.body)
+			expect(data).to.not.have.property('body')
 			done()
 		}
 	})
@@ -122,7 +133,7 @@ describe('level-http-recorder', function() {
 			}
 
 			theId = request._levelHttpRecorderId
-			assert.strictEqual(response.statusCode, 200)
+			expect(response).to.have.property('statusCode', 200)
 			db.get(request._levelHttpRecorderId, verify1)
 		}
 
@@ -132,7 +143,8 @@ describe('level-http-recorder', function() {
 			if (err)
 				done(err)
 
-			assert.strictEqual(data.body, request.body)
+			expect(data).to.have.property('body')
+			expect(data.body).to.eql(request.body)
 			done()
 		}
 	})
