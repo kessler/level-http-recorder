@@ -26,7 +26,7 @@ module.exports = function createMiddleware(db, config, modify_) {
 
 	function extract(request) {
 		var result = {
-			method: request.method,
+			method: request.method.toLowerCase(),
 			httpVersion: request.httpVersion,
 			headers: request.headers,
 			url: request.url,
