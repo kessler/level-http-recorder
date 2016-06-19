@@ -21,7 +21,7 @@ describe('level-http-recorder', function() {
 			}
 
 			expect(response).to.have.property('statusCode', 200)
-			db.get(request.requestId, verify)
+			db.get(request.request_id, verify)
 		}
 
 		handler(request, response, next)
@@ -29,7 +29,7 @@ describe('level-http-recorder', function() {
 		function verify(err, data) {
 			if (err) return done(err)
 				// does not gets saved
-			delete request.requestId
+			delete request.request_id
 			expect(data).to.have.property('httpVersion', '1.0')
 			expect(data).to.have.property('url', 'abc://d.g.f')
 			expect(data).to.have.property('ip', '1.2.3.4')
@@ -69,9 +69,9 @@ describe('level-http-recorder', function() {
 				return done(err)
 			}
 
-			theId = request.requestId
+			theId = request.request_id
 			expect(response).to.have.property('statusCode', 200)
-			db.get(request.requestId, verify1)
+			db.get(request.request_id, verify1)
 		}
 
 		handler(request, response, next)
@@ -101,9 +101,9 @@ describe('level-http-recorder', function() {
 				return done(err)
 			}
 
-			theId = request.requestId
+			theId = request.request_id
 			expect(response).to.have.property('statusCode', 200)
-			db.get(request.requestId, verify1)
+			db.get(request.request_id, verify1)
 		}
 
 		handler(request, response, next)
@@ -132,9 +132,9 @@ describe('level-http-recorder', function() {
 				return done(err)
 			}
 
-			theId = request.requestId
+			theId = request.request_id
 			expect(response).to.have.property('statusCode', 200)
-			db.get(request.requestId, verify1)
+			db.get(request.request_id, verify1)
 		}
 
 		handler(request, response, next)

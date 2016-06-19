@@ -55,7 +55,7 @@ module.exports = function createMiddleware(db, config, modify_) {
 	return function levelHttpRecorderMiddleware(request, response, next) {
 
 		var id = [label, counter++]
-		request.requestId = id
+		request.request_id = id
 
 		var requestData = extract(request)
 		
