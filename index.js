@@ -22,7 +22,7 @@ module.exports = function createMiddleware(db, config, modify_) {
 	setInterval(function () {
 		label = Date.now()
 		counter = 0
-	}).unref()
+	}, config.timestampInterval || 1000).unref()
 
 	function extract(request) {
 		var result = {
